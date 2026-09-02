@@ -1,0 +1,316 @@
+openapi: 3.0.3
+info:
+  title: SIGA Identity API
+  version: 1.1.0
+  description: JWT RS256, refresh rotation, TOTP/MFA and dynamic RBAC.
+servers:
+  - url: /api/v1
+paths:
+  /auth/login:
+    post:
+      summary: Validate credentials and return tokens or MFA challenge
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/LoginRequest' }
+      responses:
+        '200':
+          description: Authenticated or MFA challenge
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/LoginResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '429': { $ref: '#/components/responses/TooManyRequests' }
+  /auth/mfa/verify:
+    post:
+      summary: Verify TOTP and issue access/refresh tokens
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/MfaRequest' }
+      responses:
+        '200':
+          description: Tokens issued
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TokenResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /auth/refresh:
+    post:
+      summary: Rotate refresh token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RefreshRequest' }
+      responses:
+        '200':
+          description: Rotated tokens
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/TokenResponse' }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /auth/logout:
+    post:
+      summary: Revoke refresh session
+      security: [ { bearerAuth: [] } ]
+      responses:
+        '204': { description: Session revoked }
+        '401': { $ref: '#/components/responses/Unauthorized' }
+  /users:
+    get:
+      summary: List users
+      security: [ { bearerAuth: [] } ]
+      responses:
+        '200':
+          description: User page
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UserPage' }
+        '403': { $ref: '#/components/responses/Forbidden' }
+    post:
+      summary: Create user
+      security: [ { bearerAuth: [] } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UserCreateRequest' }
+      responses:
+        '201':
+          description: User created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UserResponse' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /users/{id}:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    get:
+      summary: Get user
+      security: [ { bearerAuth: [] } ]
+      responses:
+        '200':
+          description: User
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UserResponse' }
+        '404': { $ref: '#/components/responses/NotFound' }
+    patch:
+      summary: Update or deactivate user
+      security: [ { bearerAuth: [] } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/UserUpdateRequest' }
+      responses:
+        '200':
+          description: Updated user
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UserResponse' }
+        '409': { $ref: '#/components/responses/Conflict' }
+  /users/{id}/roles:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    put:
+      summary: Replace user role assignments
+      security: [ { bearerAuth: [] } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RoleAssignment' }
+      responses:
+        '200':
+          description: User with roles
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UserResponse' }
+  /roles:
+    get:
+      summary: List roles and permissions
+      security: [ { bearerAuth: [] } ]
+      responses:
+        '200':
+          description: Roles
+          content:
+            application/json:
+              schema:
+                type: array
+                items: { $ref: '#/components/schemas/RoleResponse' }
+    post:
+      summary: Create role
+      security: [ { bearerAuth: [] } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/RoleRequest' }
+      responses:
+        '201':
+          description: Role created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RoleResponse' }
+  /roles/{id}/permissions:
+    parameters:
+      - $ref: '#/components/parameters/Id'
+    put:
+      summary: Replace role permission assignments
+      security: [ { bearerAuth: [] } ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/PermissionAssignment' }
+      responses:
+        '200':
+          description: Role with permissions
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/RoleResponse' }
+components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer, bearerFormat: JWT }
+  parameters:
+    Id:
+      name: id
+      in: path
+      required: true
+      schema: { type: string, format: uuid }
+  responses:
+    Unauthorized:
+      description: Unauthorized
+      content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } }
+    Forbidden:
+      description: Forbidden
+      content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } }
+    NotFound:
+      description: Not found
+      content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } }
+    Conflict:
+      description: Domain conflict
+      content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } }
+    TooManyRequests:
+      description: Rate limited
+      content: { application/problem+json: { schema: { $ref: '#/components/schemas/Problem' } } }
+  schemas:
+    Problem:
+      type: object
+      required: [title, status, code, correlationId]
+      properties:
+        type: { type: string }
+        title: { type: string }
+        status: { type: integer }
+        code: { type: string }
+        detail: { type: string }
+        instance: { type: string }
+        correlationId: { type: string, format: uuid }
+    LoginRequest:
+      type: object
+      required: [username, password]
+      properties:
+        username: { type: string }
+        password: { type: string, format: password }
+    LoginResponse:
+      type: object
+      required: [mfaRequired]
+      properties:
+        mfaRequired: { type: boolean }
+        challengeId: { type: string, format: uuid }
+        tokens: { $ref: '#/components/schemas/TokenResponse' }
+    MfaRequest:
+      type: object
+      required: [challengeId, otp]
+      properties:
+        challengeId: { type: string, format: uuid }
+        otp: { type: string, pattern: '^[0-9]{6}$' }
+    RefreshRequest:
+      type: object
+      required: [refreshToken]
+      properties:
+        refreshToken: { type: string }
+    TokenResponse:
+      type: object
+      required: [accessToken, refreshToken, expiresIn]
+      properties:
+        accessToken: { type: string }
+        refreshToken: { type: string }
+        expiresIn: { type: integer, example: 1800 }
+        tokenType: { type: string, example: Bearer }
+    UserCreateRequest:
+      type: object
+      required: [username, email, password]
+      properties:
+        username: { type: string }
+        email: { type: string, format: email }
+        password: { type: string, format: password, minLength: 12 }
+        mfaEnabled: { type: boolean, default: false }
+        roleIds:
+          type: array
+          items: { type: string, format: uuid }
+    UserUpdateRequest:
+      type: object
+      properties:
+        email: { type: string, format: email }
+        active: { type: boolean }
+        mfaEnabled: { type: boolean }
+    UserResponse:
+      type: object
+      required: [id, username, email, active, mfaEnabled]
+      properties:
+        id: { type: string, format: uuid }
+        username: { type: string }
+        email: { type: string, format: email }
+        active: { type: boolean }
+        mfaEnabled: { type: boolean }
+        roleIds:
+          type: array
+          items: { type: string, format: uuid }
+    UserPage:
+      type: object
+      properties:
+        content:
+          type: array
+          items: { $ref: '#/components/schemas/UserResponse' }
+        page: { type: integer }
+        size: { type: integer }
+        totalElements: { type: integer, format: int64 }
+    RoleRequest:
+      type: object
+      required: [code, name]
+      properties:
+        code: { type: string }
+        name: { type: string }
+        permissionIds:
+          type: array
+          items: { type: string, format: uuid }
+    RoleResponse:
+      type: object
+      properties:
+        id: { type: string, format: uuid }
+        code: { type: string }
+        name: { type: string }
+        active: { type: boolean }
+        permissionIds:
+          type: array
+          items: { type: string, format: uuid }
+    RoleAssignment:
+      type: object
+      required: [roleIds]
+      properties:
+        roleIds:
+          type: array
+          items: { type: string, format: uuid }
+    PermissionAssignment:
+      type: object
+      required: [permissionIds]
+      properties:
+        permissionIds:
+          type: array
+          items: { type: string, format: uuid }

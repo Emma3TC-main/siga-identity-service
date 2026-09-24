@@ -1,0 +1,7 @@
+target/
+.env
+.secrets/
+.local/
+*.log
+.idea/
+__pycache__/

@@ -1,0 +1,53 @@
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: siga
+      POSTGRES_USER: siga_iam
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Run setup first}
+    ports: ["127.0.0.1:55432:5432"]
+    volumes: ["pgdata:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U siga_iam -d siga"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+  redis:
+    image: redis:7-alpine
+    ports: ["127.0.0.1:56379:6379"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+  rabbitmq:
+    image: rabbitmq:4-management
+    environment:
+      RABBITMQ_DEFAULT_USER: siga
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:?Run setup first}
+    ports: ["127.0.0.1:55672:5672", "127.0.0.1:55673:15672"]
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+  identity:
+    build: .
+    profiles: ["app"]
+    env_file: .env
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/siga
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: 5672
+      JWT_PRIVATE_KEY: file:/run/keys/private.pem
+      JWT_PUBLIC_KEY: file:/run/keys/public.pem
+    ports: ["127.0.0.1:8081:8081"]
+    volumes: ["./.secrets:/run/keys:ro"]
+    depends_on:
+      postgres: {condition: service_healthy}
+      redis: {condition: service_healthy}
+      rabbitmq: {condition: service_healthy}
+volumes:
+  pgdata:

@@ -1,0 +1,550 @@
+{
+  "client": "Thunder Client",
+  "collectionName": "SIGA IAM",
+  "dateExported": "2026-09-24T11:00:00.000Z",
+  "version": "1.2",
+  "folders": [],
+  "requests": [
+    {
+      "_id": "8c27b20a-21bd-473f-b770-47c3c33fe31f",
+      "colId": "22531e68-f4e3-4db9-a114-104300b10c9d",
+      "containerId": "",
+      "name": "01 Login",
+      "url": "{{baseUrl}}/auth/login",
+      "method": "POST",
+      "sortNum": 10000,
+      "created": "2026-09-24T11:00:00.000Z",
+      "modified": "2026-09-24T11:00:00.000Z",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "params": [],
+      "tests": [
+        {
+          "type": "statuscode",
+          "custom": "",
+          "action": "equal",
+          "value": "200"
+        }
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"username\": \"{{username}}\",\n  \"password\": \"{{password}}\"\n}",
+        "form": []
+      }
+    },
+    {
+      "_id": "d2452566-7e6e-4390-8c86-fdf0f180ad14",
+      "colId": "22531e68-f4e3-4db9-a114-104300b10c9d",
+      "containerId": "",
+      "name": "02 Enrolar MFA (solo primera vez)",
+      "url": "{{baseUrl}}/auth/mfa/enroll",
+      "method": "POST",
+      "sortNum": 20000,
+      "created": "2026-09-24T11:00:00.000Z",
+      "modified": "2026-09-24T11:00:00.000Z",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "params": [],
+      "tests": [
+        {
+          "type": "statuscode",
+          "custom": "",
+          "action": "equal",
+          "value": "200"
+        }
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"challengeId\": \"{{challengeId}}\"\n}",
+        "form": []
+      }
+    },
+    {
+      "_id": "60fa9f0c-fa7d-400a-9e52-648d81c3fad5",
+      "colId": "22531e68-f4e3-4db9-a114-104300b10c9d",
+      "containerId": "",
+      "name": "03 Verificar MFA",
+      "url": "{{baseUrl}}/auth/mfa/verify",
+      "method": "POST",
+      "sortNum": 30000,
+      "created": "2026-09-24T11:00:00.000Z",
+      "modified": "2026-09-24T11:00:00.000Z",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "params": [],
+      "tests": [
+        {
+          "type": "statuscode",
+          "custom": "",
+          "action": "equal",
+          "value": "200"
+        }
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"challengeId\": \"{{challengeId}}\",\n  \"otp\": \"{{otp}}\"\n}",
+        "form": []
+      }
+    },
+    {
+      "_id": "0f263ba4-a858-4c89-84b8-74ec90c6190a",
+      "colId": "22531e68-f4e3-4db9-a114-104300b10c9d",
+      "containerId": "",
+      "name": "04 Listar usuarios",
+      "url": "{{baseUrl}}/users?page=0&size=20",
+      "method": "GET",
+      "sortNum": 40000,
+      "created": "2026-09-24T11:00:00.000Z",
+      "modified": "2026-09-24T11:00:00.000Z",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{accessToken}}"
+        }
+      ],
+      "params": [],
+      "tests": [
+        {
+          "type": "statuscode",
+          "custom": "",
+          "action": "equal",
+          "value": "200"
+        }
+      ]
+    },
+    {
+      "_id": "7b2db996-7b40-444e-800a-23ad2ed385a9",
+      "colId": "22531e68-f4e3-4db9-a114-104300b10c9d",
+      "containerId": "",
+      "name": "05 Crear usuario",
+      "url": "{{baseUrl}}/users",
+      "method": "POST",
+      "sortNum": 50000,
+      "created": "2026-09-24T11:00:00.000Z",
+      "modified": "2026-09-24T11:00:00.000Z",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{accessToken}}"
+        }
+      ],
+      "params": [],
+      "tests": [
+        {
+          "type": "statuscode",
+          "custom": "",
+          "action": "equal",
+          "value": "201"
+        }
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"username\": \"prueba.thunder\",\n  \"email\": \"prueba.thunder@siga.test\",\n  \"password\": \"{{testPassword}}\",\n  \"mfaEnabled\": false\n}",
+        "form": []
+      }
+    },
+    {
+      "_id": "cdec2252-a3a3-483f-b152-608e87240162",
+      "colId": "22531e68-f4e3-4db9-a114-104300b10c9d",
+      "containerId": "",
+      "name": "06 Consultar usuario",
+      "url": "{{baseUrl}}/users/{{userId}}",
+      "method": "GET",
+      "sortNum": 60000,
+      "created": "2026-09-24T11:00:00.000Z",
+      "modified": "2026-09-24T11:00:00.000Z",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{accessToken}}"
+        }
+      ],
+      "params": [],
+      "tests": [
+        {
+          "type": "statuscode",
+          "custom": "",
+          "action": "equal",
+          "value": "200"
+        }
+      ]
+    },
+    {
+      "_id": "7a6bb748-1e5a-4409-a4eb-c3242b398d53",
+      "colId": "22531e68-f4e3-4db9-a114-104300b10c9d",
+      "containerId": "",
+      "name": "07 Actualizar usuario",
+      "url": "{{baseUrl}}/users/{{userId}}",
+      "method": "PATCH",
+      "sortNum": 70000,
+      "created": "2026-09-24T11:00:00.000Z",
+      "modified": "2026-09-24T11:00:00.000Z",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{accessToken}}"
+        }
+      ],
+      "params": [],
+      "tests": [
+        {
+          "type": "statuscode",
+          "custom": "",
+          "action": "equal",
+          "value": "200"
+        }
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"email\": \"actualizado@siga.test\"\n}",
+        "form": []
+      }
+    },
+    {
+      "_id": "bb379553-4acd-4da0-842c-1caa5c6899d4",
+      "colId": "22531e68-f4e3-4db9-a114-104300b10c9d",
+      "containerId": "",
+      "name": "08 Listar permisos",
+      "url": "{{baseUrl}}/permissions",
+      "method": "GET",
+      "sortNum": 80000,
+      "created": "2026-09-24T11:00:00.000Z",
+      "modified": "2026-09-24T11:00:00.000Z",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{accessToken}}"
+        }
+      ],
+      "params": [],
+      "tests": [
+        {
+          "type": "statuscode",
+          "custom": "",
+          "action": "equal",
+          "value": "200"
+        }
+      ]
+    },
+    {
+      "_id": "bb8036b6-e9eb-42ab-9f05-3dcd4ca97cab",
+      "colId": "22531e68-f4e3-4db9-a114-104300b10c9d",
+      "containerId": "",
+      "name": "09 Listar roles",
+      "url": "{{baseUrl}}/roles",
+      "method": "GET",
+      "sortNum": 90000,
+      "created": "2026-09-24T11:00:00.000Z",
+      "modified": "2026-09-24T11:00:00.000Z",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{accessToken}}"
+        }
+      ],
+      "params": [],
+      "tests": [
+        {
+          "type": "statuscode",
+          "custom": "",
+          "action": "equal",
+          "value": "200"
+        }
+      ]
+    },
+    {
+      "_id": "3daa50d3-a934-4617-b4ca-7a2610cfb6c5",
+      "colId": "22531e68-f4e3-4db9-a114-104300b10c9d",
+      "containerId": "",
+      "name": "10 Crear rol",
+      "url": "{{baseUrl}}/roles",
+      "method": "POST",
+      "sortNum": 100000,
+      "created": "2026-09-24T11:00:00.000Z",
+      "modified": "2026-09-24T11:00:00.000Z",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{accessToken}}"
+        }
+      ],
+      "params": [],
+      "tests": [
+        {
+          "type": "statuscode",
+          "custom": "",
+          "action": "equal",
+          "value": "201"
+        }
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"code\": \"LECTOR_THUNDER\",\n  \"name\": \"Lector de pruebas\",\n  \"permissionIds\": [\n    \"10000000-0000-0000-0000-000000000001\"\n  ]\n}",
+        "form": []
+      }
+    },
+    {
+      "_id": "5fb478d0-6033-4b0f-8732-88920bd64dfd",
+      "colId": "22531e68-f4e3-4db9-a114-104300b10c9d",
+      "containerId": "",
+      "name": "11 Asignar permisos",
+      "url": "{{baseUrl}}/roles/{{roleId}}/permissions",
+      "method": "PUT",
+      "sortNum": 110000,
+      "created": "2026-09-24T11:00:00.000Z",
+      "modified": "2026-09-24T11:00:00.000Z",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{accessToken}}"
+        }
+      ],
+      "params": [],
+      "tests": [
+        {
+          "type": "statuscode",
+          "custom": "",
+          "action": "equal",
+          "value": "200"
+        }
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"permissionIds\": [\n    \"10000000-0000-0000-0000-000000000001\"\n  ]\n}",
+        "form": []
+      }
+    },
+    {
+      "_id": "e3396f14-5280-4016-b760-8da7f1e810a2",
+      "colId": "22531e68-f4e3-4db9-a114-104300b10c9d",
+      "containerId": "",
+      "name": "12 Asignar rol",
+      "url": "{{baseUrl}}/users/{{userId}}/roles",
+      "method": "PUT",
+      "sortNum": 120000,
+      "created": "2026-09-24T11:00:00.000Z",
+      "modified": "2026-09-24T11:00:00.000Z",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{accessToken}}"
+        }
+      ],
+      "params": [],
+      "tests": [
+        {
+          "type": "statuscode",
+          "custom": "",
+          "action": "equal",
+          "value": "200"
+        }
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"roleIds\": [\n    \"{{roleId}}\"\n  ]\n}",
+        "form": []
+      }
+    },
+    {
+      "_id": "730cc432-7feb-4b42-933b-c6687b908ff1",
+      "colId": "22531e68-f4e3-4db9-a114-104300b10c9d",
+      "containerId": "",
+      "name": "13 Refresh",
+      "url": "{{baseUrl}}/auth/refresh",
+      "method": "POST",
+      "sortNum": 130000,
+      "created": "2026-09-24T11:00:00.000Z",
+      "modified": "2026-09-24T11:00:00.000Z",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "params": [],
+      "tests": [
+        {
+          "type": "statuscode",
+          "custom": "",
+          "action": "equal",
+          "value": "200"
+        }
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"refreshToken\": \"{{refreshToken}}\"\n}",
+        "form": []
+      }
+    },
+    {
+      "_id": "d8cf0862-b11f-4b16-b40d-bc8d1b56a3cb",
+      "colId": "22531e68-f4e3-4db9-a114-104300b10c9d",
+      "containerId": "",
+      "name": "14 Desactivar usuario",
+      "url": "{{baseUrl}}/users/{{userId}}",
+      "method": "PATCH",
+      "sortNum": 140000,
+      "created": "2026-09-24T11:00:00.000Z",
+      "modified": "2026-09-24T11:00:00.000Z",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{accessToken}}"
+        }
+      ],
+      "params": [],
+      "tests": [
+        {
+          "type": "statuscode",
+          "custom": "",
+          "action": "equal",
+          "value": "200"
+        }
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"active\": false\n}",
+        "form": []
+      }
+    },
+    {
+      "_id": "4182db41-6e1b-417e-9fc9-fc93ce0a1c61",
+      "colId": "22531e68-f4e3-4db9-a114-104300b10c9d",
+      "containerId": "",
+      "name": "15 Logout",
+      "url": "{{baseUrl}}/auth/logout",
+      "method": "POST",
+      "sortNum": 150000,
+      "created": "2026-09-24T11:00:00.000Z",
+      "modified": "2026-09-24T11:00:00.000Z",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        },
+        {
+          "name": "Authorization",
+          "value": "Bearer {{accessToken}}"
+        }
+      ],
+      "params": [],
+      "tests": [
+        {
+          "type": "statuscode",
+          "custom": "",
+          "action": "equal",
+          "value": "204"
+        }
+      ]
+    },
+    {
+      "_id": "4ae6b8a0-314d-46d5-ab26-1200bd7d7fad",
+      "colId": "22531e68-f4e3-4db9-a114-104300b10c9d",
+      "containerId": "",
+      "name": "16 Credenciales incorrectas",
+      "url": "{{baseUrl}}/auth/login",
+      "method": "POST",
+      "sortNum": 160000,
+      "created": "2026-09-24T11:00:00.000Z",
+      "modified": "2026-09-24T11:00:00.000Z",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "params": [],
+      "tests": [
+        {
+          "type": "statuscode",
+          "custom": "",
+          "action": "equal",
+          "value": "401"
+        }
+      ],
+      "body": {
+        "type": "json",
+        "raw": "{\n  \"username\": \"no.existe\",\n  \"password\": \"invalida\"\n}",
+        "form": []
+      }
+    },
+    {
+      "_id": "19332b27-4c0e-430c-9c11-8cd044e8724d",
+      "colId": "22531e68-f4e3-4db9-a114-104300b10c9d",
+      "containerId": "",
+      "name": "17 Sin autenticacion",
+      "url": "{{baseUrl}}/users",
+      "method": "GET",
+      "sortNum": 170000,
+      "created": "2026-09-24T11:00:00.000Z",
+      "modified": "2026-09-24T11:00:00.000Z",
+      "headers": [
+        {
+          "name": "Content-Type",
+          "value": "application/json"
+        }
+      ],
+      "params": [],
+      "tests": [
+        {
+          "type": "statuscode",
+          "custom": "",
+          "action": "equal",
+          "value": "401"
+        }
+      ]
+    }
+  ]
+}

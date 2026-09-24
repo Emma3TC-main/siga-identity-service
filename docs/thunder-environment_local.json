@@ -1,0 +1,48 @@
+{
+  "client": "Thunder Client",
+  "environmentName": "SIGA Local",
+  "dateExported": "2026-09-24T11:00:00.000Z",
+  "version": "1.0",
+  "variables": [
+    {
+      "name": "baseUrl",
+      "value": "http://localhost:8081/api/v1"
+    },
+    {
+      "name": "username",
+      "value": "admin.demo"
+    },
+    {
+      "name": "password",
+      "value": ""
+    },
+    {
+      "name": "challengeId",
+      "value": ""
+    },
+    {
+      "name": "otp",
+      "value": ""
+    },
+    {
+      "name": "accessToken",
+      "value": ""
+    },
+    {
+      "name": "refreshToken",
+      "value": ""
+    },
+    {
+      "name": "userId",
+      "value": ""
+    },
+    {
+      "name": "roleId",
+      "value": ""
+    },
+    {
+      "name": "testPassword",
+      "value": ""
+    }
+  ]
+}

@@ -1,0 +1,53 @@
+server:
+  port: ${PORT:8081}
+  forward-headers-strategy: none
+spring:
+  application:
+    name: siga-identity-service
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:55432/siga}
+    username: ${DB_USER:siga_iam}
+    password: ${DB_PASSWORD}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+  flyway:
+    default-schema: iam
+    schemas: iam
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:56379}
+      timeout: 2s
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:55672}
+    username: ${RABBITMQ_USER:siga}
+    password: ${RABBITMQ_PASSWORD}
+    publisher-confirm-type: correlated
+    publisher-returns: true
+    template:
+      mandatory: true
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+  endpoint:
+    health:
+      show-details: never
+iam:
+  issuer: ${JWT_ISSUER:siga-identity}
+  audience: ${JWT_AUDIENCE:siga-api}
+  private-key: ${JWT_PRIVATE_KEY:file:.secrets/private.pem}
+  public-key: ${JWT_PUBLIC_KEY:file:.secrets/public.pem}
+  encryption-key: ${MFA_ENCRYPTION_KEY}
+  access-seconds: 1800
+  refresh-seconds: 604800
+  challenge-seconds: 300
+  max-attempts: 5
+  lock-seconds: 900
+  login-rate: 10
+  bootstrap-password: ${IAM_BOOTSTRAP_PASSWORD:}
+  outbox-enabled: ${OUTBOX_ENABLED:true}

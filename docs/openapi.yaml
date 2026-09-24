@@ -1,11 +1,66 @@
 openapi: 3.0.3
 info:
   title: SIGA Identity API
-  version: 1.1.0
-  description: JWT RS256, refresh rotation, TOTP/MFA and dynamic RBAC.
+  version: 1.2.0
+  description: |
+    JWT RS256, refresh rotation, TOTP/MFA and dynamic RBAC.
+    Access tokens expire after 30 minutes; refresh tokens rotate with a 7-day lifetime.
+    Bearer tokens are required for protected endpoints. This contract uses JSON refresh tokens,
+    intended for native clients; a web BFF must add secure cookies and CSRF protection.
+    USER_MANAGE protects user reads/writes. ROLE_MANAGE protects role operations and role assignments.
+    User creation with roleIds also requires ROLE_MANAGE. All administrative writes require
+    a token issued after MFA in the last 5 minutes; sign in again for step-up.
+    Additional common errors: 400 validation, 401 invalid session, 403 missing permission or
+    recent MFA, 409 conflict, 429 rate/attempt limit, 503 unavailable dependency.
+    MFA enrollment and permission discovery extend the baseline contract without changing existing paths.
+    JWKS is published at the root /.well-known/jwks.json (outside /api/v1).
 servers:
   - url: /api/v1
 paths:
+  /auth/mfa/enroll:
+    post:
+      summary: Enroll a TOTP authenticator after password verification
+      description: Requires a live login challenge. Only available before the first successful MFA verification. Store the returned secret in an authenticator; never log it. MFA challenges expire after 5 minutes.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [challengeId]
+              properties:
+                challengeId: {type: string, format: uuid}
+      responses:
+        '200':
+          description: One enrollment secret and otpauth URI; response is not cacheable
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [secret, otpauthUri]
+                properties:
+                  secret: {type: string}
+                  otpauthUri: {type: string}
+        '401': {$ref: '#/components/responses/Unauthorized'}
+        '409': {$ref: '#/components/responses/Conflict'}
+  /permissions:
+    get:
+      summary: List the permission catalog (ROLE_MANAGE)
+      security: [{bearerAuth: []}]
+      responses:
+        '200':
+          description: Reference permissions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id: {type: string, format: uuid}
+                    code: {type: string}
+                    description: {type: string}
+        '403': {$ref: '#/components/responses/Forbidden'}
   /auth/login:
     post:
       summary: Validate credentials and return tokens or MFA challenge
@@ -62,7 +117,10 @@ paths:
         '401': { $ref: '#/components/responses/Unauthorized' }
   /users:
     get:
-      summary: List users
+      summary: List users (USER_MANAGE)
+      parameters:
+        - {name: page, in: query, schema: {type: integer, minimum: 0, default: 0}}
+        - {name: size, in: query, schema: {type: integer, minimum: 1, maximum: 100, default: 20}}
       security: [ { bearerAuth: [] } ]
       responses:
         '200':

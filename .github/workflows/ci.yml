@@ -1,0 +1,51 @@
+name: Identity CI
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: siga_identity_test
+          POSTGRES_USER: siga_iam
+          POSTGRES_PASSWORD: ci-test-password
+        ports: ["55432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U siga_iam -d siga_identity_test"
+          --health-interval 5s --health-timeout 5s --health-retries 20
+      redis:
+        image: redis:7-alpine
+        ports: ["56379:6379"]
+      rabbitmq:
+        image: rabbitmq:4-alpine
+        env:
+          RABBITMQ_DEFAULT_USER: siga
+          RABBITMQ_DEFAULT_PASS: ci-test-password
+        ports: ["55672:5672"]
+        options: >-
+          --health-cmd "rabbitmq-diagnostics -q ping"
+          --health-interval 5s --health-timeout 5s --health-retries 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - run: java scripts/SetupKeys.java
+      - run: mvn -B verify
+        env:
+          DB_URL: jdbc:postgresql://localhost:55432/siga_identity_test
+          DB_PASSWORD: ci-test-password
+          RABBITMQ_PASSWORD: ci-test-password
+          MFA_ENCRYPTION_KEY: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: |
+            target/surefire-reports/*.xml
+            target/site/jacoco/

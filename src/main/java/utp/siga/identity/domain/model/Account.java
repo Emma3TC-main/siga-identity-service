@@ -1,4 +1,4 @@
-package utp.siga.identity.domain;
+package utp.siga.identity.domain.model;
 
 import java.time.Instant;
 import java.util.UUID;

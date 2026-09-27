@@ -10,11 +10,11 @@ jobs:
         image: postgres:17
         env:
           POSTGRES_DB: siga_identity_test
-          POSTGRES_USER: siga_iam
+          POSTGRES_USER: siga_iam_test
           POSTGRES_PASSWORD: ci-test-password
         ports: ["55432:5432"]
         options: >-
-          --health-cmd "pg_isready -U siga_iam -d siga_identity_test"
+          --health-cmd "pg_isready -U siga_iam_test -d siga_identity_test"
           --health-interval 5s --health-timeout 5s --health-retries 20
       redis:
         image: redis:7-alpine
@@ -39,6 +39,7 @@ jobs:
       - run: mvn -B verify
         env:
           DB_URL: jdbc:postgresql://localhost:55432/siga_identity_test
+          DB_USER: siga_iam_test
           DB_PASSWORD: ci-test-password
           RABBITMQ_PASSWORD: ci-test-password
           MFA_ENCRYPTION_KEY: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=

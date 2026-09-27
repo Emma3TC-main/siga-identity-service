@@ -1,4 +1,4 @@
-package utp.siga.identity.infrastructure;
+package utp.siga.identity.infrastructure.security;
 
 import java.time.Duration;
 import java.util.*;
@@ -6,7 +6,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Component;
-import utp.siga.identity.domain.IdentityException;
+import utp.siga.identity.domain.exception.IdentityException;
 
 @Component
 public class ChallengeStore {

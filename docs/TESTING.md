@@ -1,5 +1,15 @@
 # Validación de IAM
 
+## Procedimiento vigente
+
+Seguir [LOCAL.md](LOCAL.md). Los tests usan PostgreSQL/Redis/RabbitMQ externos de Compose, no Testcontainers; se retiraron dependencias Testcontainers no utilizadas. Las nuevas instancias crean `siga_iam_test` sin CONNECT a la base operativa. El inicializador global del classpath de tests rechaza URL/usuario/overrides inseguros antes de instanciar DataSource/Flyway, además de la comprobación defensiva de los fixtures.
+
+Pruebas afectadas ejecutadas en esta continuación: 15 casos de `TestDatabaseSafetyTest`, nueve de `IdentityIntegrationTest`, un arranque de integración con URL operativa rechazado antes de conexión y comprobaciones HTTP específicas de management. No se repitieron los 24 checks históricos ni las dos pruebas criptográficas. Evidencia y límites en [CIERRE_LOCAL_2026-09-26.md](CIERRE_LOCAL_2026-09-26.md). La salida vigente es `.local/<instance>/test-build`; los resultados de abajo siguen siendo históricos.
+
+## Registro histórico
+
+> Los resultados siguientes son históricos (24/09/2026). La ejecución nueva del 26/09/2026 y sus límites están en [VALIDACION_LOCAL_2026-09-26.md](VALIDACION_LOCAL_2026-09-26.md); comandos vigentes en [LOCAL.md](LOCAL.md).
+
 Ejecutada localmente el 24 de septiembre de 2026, con Java 21, PostgreSQL 17.11, Redis 7 y RabbitMQ 4 en Docker/WSL. No se usó H2 para sustituir PostgreSQL.
 
 ## Resultados

@@ -1,4 +1,4 @@
-package utp.siga.identity.domain;
+package utp.siga.identity.domain.exception;
 
 public class IdentityException extends RuntimeException {
   public final int status;

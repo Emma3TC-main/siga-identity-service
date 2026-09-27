@@ -1,5 +1,7 @@
 # Diccionario IAM implementado
 
+> No sustituye `siga-documentation/SIGA_Documentacion_Tecnica_Final_v1.2/database/dictionary.md`. Los campos añadidos por V4 describen el código existente y están pendientes de alineación aprobada: ver [propuesta de modelo/contrato](../PROPUESTAS_CONTRATO_Y_REFRESH.md).
+
 Se conservan las siete tablas canónicas de SIGA v1.2. El modelo físico completo de este servicio está en `physical_model.sql`; la ejecución se hace exclusivamente mediante Flyway V1–V4.
 
 | Tabla | Responsabilidad y restricciones |

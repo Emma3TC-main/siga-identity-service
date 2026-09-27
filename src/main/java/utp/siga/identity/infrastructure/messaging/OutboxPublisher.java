@@ -1,4 +1,4 @@
-package utp.siga.identity.infrastructure;
+package utp.siga.identity.infrastructure.messaging;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.*;
@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import utp.siga.identity.infrastructure.persistence.IdentityRepository;
 
 @Component
 @ConditionalOnProperty(name = "iam.outbox-enabled", havingValue = "true")
@@ -44,12 +45,11 @@ public class OutboxPublisher {
   @Scheduled(fixedDelayString = "${iam.outbox-delay:3000}")
   @Transactional
   public void publish() {
-    var events =
-        repo.jdbc()
-            .queryForList(
-                "SELECT * FROM iam.outbox_event WHERE status='PENDING' AND (next_attempt_at IS NULL"
-                    + " OR next_attempt_at<=now()) ORDER BY occurred_at LIMIT 20 FOR UPDATE SKIP"
-                    + " LOCKED");
+    var events = repo.jdbc()
+        .queryForList(
+            "SELECT * FROM iam.outbox_event WHERE status='PENDING' AND (next_attempt_at IS NULL"
+                + " OR next_attempt_at<=now()) ORDER BY occurred_at LIMIT 20 FOR UPDATE SKIP"
+                + " LOCKED");
     for (var row : events) {
       UUID id = (UUID) row.get("id");
       try {
@@ -83,7 +83,8 @@ public class OutboxPublisher {
                     + " status='PUBLISHED',published_at=now(),attempts=attempts+1 WHERE id=?",
                 id);
       } catch (Exception e) {
-        if (e instanceof InterruptedException) Thread.currentThread().interrupt();
+        if (e instanceof InterruptedException)
+          Thread.currentThread().interrupt();
         repo.jdbc()
             .update(
                 "UPDATE iam.outbox_event SET attempts=attempts+1,next_attempt_at=now()+interval '30"

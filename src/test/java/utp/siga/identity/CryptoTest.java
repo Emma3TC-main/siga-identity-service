@@ -3,7 +3,7 @@ package utp.siga.identity;
 import static org.assertj.core.api.Assertions.*;
 
 import org.junit.jupiter.api.Test;
-import utp.siga.identity.infrastructure.Crypto;
+import utp.siga.identity.infrastructure.security.Crypto;
 
 class CryptoTest {
   @Test

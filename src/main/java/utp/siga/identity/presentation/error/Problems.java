@@ -1,4 +1,4 @@
-package utp.siga.identity.presentation;
+package utp.siga.identity.presentation.error;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.*;
@@ -12,7 +12,8 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
-import utp.siga.identity.domain.IdentityException;
+import utp.siga.identity.domain.exception.IdentityException;
+import utp.siga.identity.presentation.rest.CorrelationFilter;
 
 @RestControllerAdvice
 public class Problems {

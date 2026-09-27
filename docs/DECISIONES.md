@@ -1,5 +1,7 @@
 # Decisiones de implementación
 
+> Este archivo registra decisiones históricas de implementación; no sustituye los ADR y contratos aprobados en `siga-documentation/SIGA_Documentacion_Tecnica_Final_v1.2`. La revisión local del 26/09/2026 identifica discrepancias pendientes en [VALIDACION_LOCAL_2026-09-26.md](VALIDACION_LOCAL_2026-09-26.md). Para los puertos y comandos vigentes del entorno compartido, usar [LOCAL.md](LOCAL.md).
+
 ## Alcance y fuentes
 
 Encargo confirmado en el chat: implementar `siga-identity-service` en Spring Boot, login/cuentas/permisos; probar las APIs y levantar PostgreSQL con Docker si es posible. Los demás repositorios SIGA quedan fuera de esta implementación.
@@ -14,7 +16,7 @@ Se partió del repositorio de Emma3TC-main y se contrastó con los ZIP proporcio
 - MFA es obligatorio para USER_MANAGE, ROLE_MANAGE, MOVEMENT_AUTHORIZE e INVENTORY_ADJUST. Las escrituras administrativas requieren MFA de los últimos 5 minutos. Un nuevo login+MFA permite step-up sin inventar un endpoint de las operaciones de inventario.
 - Crear usuarios con `mfaEnabled=true` deja el enrolamiento pendiente: el usuario inicia sesión, obtiene challenge, solicita enrolamiento, registra la clave en su autenticador y verifica OTP. No se devuelve el secreto en el CRUD de usuarios.
 - Se impide autodesactivarse y modificar permisos del rol ADMIN.
-- Esta API implementa el transporte JSON de refresh descrito en OpenAPI. La integración web con cookies HttpOnly/Secure/SameSite y CSRF pertenece al BFF/Gateway. No se habilita CORS amplio ni cookies de autenticación aquí.
+- Esta API implementa el transporte JSON de refresh descrito en OpenAPI. La atribución histórica de cookies/CSRF a BFF/Gateway no estaba aprobada: SEQ-15 muestra IAM respondiendo con refresh rotado en cookie y no hay BFF aprobado. La decisión técnica y el contrato web están pendientes; ver [propuesta para revisión](PROPUESTAS_CONTRATO_Y_REFRESH.md). No se implementaron cookies/login Web en esta tarea.
 
 ## Persistencia, seguridad y mensajería
 

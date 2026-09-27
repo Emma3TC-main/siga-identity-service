@@ -1,4 +1,4 @@
-package utp.siga.identity.presentation;
+package utp.siga.identity.presentation.rest;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -8,9 +8,12 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
-import utp.siga.identity.application.*;
-import utp.siga.identity.domain.IdentityException;
-import utp.siga.identity.infrastructure.*;
+import utp.siga.identity.application.dto.Api;
+import utp.siga.identity.application.usecase.AuthService;
+import utp.siga.identity.application.usecase.ManagementService;
+import utp.siga.identity.domain.exception.IdentityException;
+import utp.siga.identity.infrastructure.persistence.IdentityRepository;
+import utp.siga.identity.infrastructure.security.TokenService;
 
 @RestController
 public class IdentityController {
@@ -78,9 +81,8 @@ public class IdentityController {
 
   @PostMapping("/api/v1/users")
   @ResponseStatus(HttpStatus.CREATED)
-  @PreAuthorize(
-      "hasAuthority('USER_MANAGE') and @accessPolicy.recent(authentication) and ( #input.roleIds()"
-          + " == null or #input.roleIds().isEmpty() or hasAuthority('ROLE_MANAGE'))")
+  @PreAuthorize("hasAuthority('USER_MANAGE') and @accessPolicy.recent(authentication) and ( #input.roleIds()"
+      + " == null or #input.roleIds().isEmpty() or hasAuthority('ROLE_MANAGE'))")
   public Api.User create(@Valid @RequestBody Api.CreateUser input) {
     return management.create(input);
   }

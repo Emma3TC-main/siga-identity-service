@@ -1,9 +1,14 @@
+param([string]$Instance = 'team', [string]$Tests)
 $ErrorActionPreference = 'Stop'
 Set-Location (Split-Path $PSScriptRoot -Parent)
-Get-Content '.env' | ForEach-Object {
-  if ($_ -match '^([A-Z_]+)=(.*)$') { [Environment]::SetEnvironmentVariable($matches[1], $matches[2], 'Process') }
-}
-# A dedicated database is mandatory; tests refuse any database without the _test suffix.
-$env:DB_URL='jdbc:postgresql://localhost:55432/siga_identity_test'
-./mvnw.cmd -B verify
-exit $LASTEXITCODE
+. "$PSScriptRoot/Import-LocalEnvironment.ps1" -Instance $Instance -ForTests
+# Dedicated test database: the integration suite truncates its IAM tables and Redis DB 1.
+# Windows PowerShell 5.1 treats redirected JVM warnings as errors with Stop.
+# Maven's exit code, not stderr warnings, determines the result.
+$ErrorActionPreference = 'Continue'
+$mavenArgs = @('-B',"-Dsiga.build.directory=.local/$Instance/test-build",'verify')
+if ($Tests) { $mavenArgs += "-Dtest=$Tests" }
+./mvnw.cmd @mavenArgs
+$mavenExit = $LASTEXITCODE
+$ErrorActionPreference = 'Stop'
+exit $mavenExit

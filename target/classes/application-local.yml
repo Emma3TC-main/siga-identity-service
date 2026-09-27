@@ -1,20 +1,32 @@
+server:
+  address: 127.0.0.1
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/siga
-    username: siga_iam
-    password: siga_iam
-  
-  rabbitmq:
-    host: localhost
-    port: 5672
-    username: siga_mq
-    password: siga_mq_secret
-
+    url: ${DB_URL:jdbc:postgresql://127.0.0.1:15432/siga}
   data:
     redis:
-      host: localhost
-      port: 6379
-
-# Configuración JWT (Apunta a las llaves que generaste)
-jwt:
-  public-key: file:../../siga-infrastructure/secrets/jwt_public.pem
+      host: ${REDIS_HOST:127.0.0.1}
+      port: ${REDIS_PORT:6379}
+  rabbitmq:
+    host: ${RABBITMQ_HOST:127.0.0.1}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USER:siga_mq}
+management:
+  server:
+    address: 127.0.0.1
+    port: ${MANAGEMENT_PORT:9081}
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus
+  endpoint:
+    health:
+      show-details: never
+      show-components: never
+      probes:
+        enabled: true
+      group:
+        liveness:
+          include: livenessState
+        readiness:
+          include: readinessState,db,redis

@@ -1,0 +1,2 @@
+# Loaded by every SpringApplication on the test classpath, before singleton creation.
+org.springframework.context.ApplicationContextInitializer=utp.siga.identity.TestDatabaseSafety

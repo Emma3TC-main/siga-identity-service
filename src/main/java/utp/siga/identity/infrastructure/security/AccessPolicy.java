@@ -1,4 +1,4 @@
-package utp.siga.identity.infrastructure;
+package utp.siga.identity.infrastructure.security;
 
 import java.time.Instant;
 import org.springframework.security.core.Authentication;

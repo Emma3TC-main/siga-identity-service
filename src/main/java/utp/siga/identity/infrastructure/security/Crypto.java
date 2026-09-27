@@ -1,4 +1,4 @@
-package utp.siga.identity.infrastructure;
+package utp.siga.identity.infrastructure.security;
 
 import java.nio.*;
 import java.nio.charset.StandardCharsets;

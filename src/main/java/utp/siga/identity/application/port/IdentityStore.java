@@ -1,7 +1,8 @@
-package utp.siga.identity.domain;
+package utp.siga.identity.application.port;
 
 import java.util.*;
-import utp.siga.identity.application.Api;
+import utp.siga.identity.application.dto.Api;
+import utp.siga.identity.domain.model.Account;
 
 public interface IdentityStore {
   Optional<Account> byUsername(String name);

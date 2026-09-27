@@ -1,4 +1,4 @@
-package utp.siga.identity.presentation;
+package utp.siga.identity.presentation.rest;
 
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;

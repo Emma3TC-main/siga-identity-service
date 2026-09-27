@@ -1,4 +1,4 @@
-package utp.siga.identity.infrastructure;
+package utp.siga.identity.infrastructure.config;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
@@ -6,6 +6,7 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
+import utp.siga.identity.infrastructure.persistence.IdentityRepository;
 
 @Component
 public class Bootstrap implements ApplicationRunner {

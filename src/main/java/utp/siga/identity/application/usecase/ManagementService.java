@@ -1,11 +1,13 @@
-package utp.siga.identity.application;
+package utp.siga.identity.application.usecase;
 
 import java.util.*;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import utp.siga.identity.domain.*;
-import utp.siga.identity.infrastructure.*;
+import utp.siga.identity.application.dto.Api;
+import utp.siga.identity.domain.exception.IdentityException;
+import utp.siga.identity.infrastructure.persistence.IdentityRepository;
+import utp.siga.identity.infrastructure.security.Crypto;
 
 @Service
 public class ManagementService {

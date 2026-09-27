@@ -1,4 +1,4 @@
-package utp.siga.identity.infrastructure;
+package utp.siga.identity.infrastructure.security;
 
 import com.nimbusds.jose.jwk.*;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
@@ -13,7 +13,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.stereotype.Component;
-import utp.siga.identity.domain.Account;
+import utp.siga.identity.domain.model.Account;
 
 @Component
 public class TokenService {
@@ -33,18 +33,16 @@ public class TokenService {
       throws Exception {
     var f = KeyFactory.getInstance("RSA");
     publicKey = (RSAPublicKey) f.generatePublic(new X509EncodedKeySpec(pem(publicResource)));
-    var privateKey =
-        (RSAPrivateKey) f.generatePrivate(new PKCS8EncodedKeySpec(pem(privateResource)));
+    var privateKey = (RSAPrivateKey) f.generatePrivate(new PKCS8EncodedKeySpec(pem(privateResource)));
     if (!privateKey.getModulus().equals(publicKey.getModulus())
         || publicKey.getModulus().bitLength() < 2048)
       throw new IllegalArgumentException("Invalid RSA key pair");
-    jwk =
-        new RSAKey.Builder(publicKey)
-            .privateKey(privateKey)
-            .keyID(
-                Crypto.hash(Base64.getEncoder().encodeToString(publicKey.getEncoded()))
-                    .substring(0, 16))
-            .build();
+    jwk = new RSAKey.Builder(publicKey)
+        .privateKey(privateKey)
+        .keyID(
+            Crypto.hash(Base64.getEncoder().encodeToString(publicKey.getEncoded()))
+                .substring(0, 16))
+        .build();
     encoder = new NimbusJwtEncoder(new ImmutableJWKSet<>(new JWKSet(jwk)));
     this.issuer = issuer;
     this.audience = audience;
@@ -64,19 +62,19 @@ public class TokenService {
 
   public String access(Account a, Set<String> permissions, UUID family, Long mfaTime) {
     var now = Instant.now();
-    var claims =
-        JwtClaimsSet.builder()
-            .issuer(issuer)
-            .audience(List.of(audience))
-            .subject(a.id().toString())
-            .issuedAt(now)
-            .expiresAt(now.plusSeconds(accessSeconds))
-            .id(UUID.randomUUID().toString())
-            .claim("username", a.username())
-            .claim("permissions", permissions)
-            .claim("sid", family.toString())
-            .claim("amr", mfaTime == null ? List.of("pwd") : List.of("pwd", "otp"));
-    if (mfaTime != null) claims.claim("auth_time", mfaTime);
+    var claims = JwtClaimsSet.builder()
+        .issuer(issuer)
+        .audience(List.of(audience))
+        .subject(a.id().toString())
+        .issuedAt(now)
+        .expiresAt(now.plusSeconds(accessSeconds))
+        .id(UUID.randomUUID().toString())
+        .claim("username", a.username())
+        .claim("permissions", permissions)
+        .claim("sid", family.toString())
+        .claim("amr", mfaTime == null ? List.of("pwd") : List.of("pwd", "otp"));
+    if (mfaTime != null)
+      claims.claim("auth_time", mfaTime);
     return encoder
         .encode(
             JwtEncoderParameters.from(

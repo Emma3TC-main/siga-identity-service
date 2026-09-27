@@ -13,10 +13,12 @@ import org.springframework.core.io.Resource;
 import org.springframework.security.oauth2.jose.jws.SignatureAlgorithm;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.stereotype.Component;
+import utp.siga.identity.application.port.out.JwksPort;
+import utp.siga.identity.application.port.out.TokenIssuerPort;
 import utp.siga.identity.domain.model.Account;
 
 @Component
-public class TokenService {
+public class TokenService implements TokenIssuerPort, JwksPort {
   private final RSAKey jwk;
   private final JwtEncoder encoder;
   public final RSAPublicKey publicKey;
@@ -81,6 +83,16 @@ public class TokenService {
                 JwsHeader.with(SignatureAlgorithm.RS256).keyId(jwk.getKeyID()).build(),
                 claims.build()))
         .getTokenValue();
+  }
+
+  @Override
+  public long accessSeconds() {
+    return accessSeconds;
+  }
+
+  @Override
+  public long refreshSeconds() {
+    return refreshSeconds;
   }
 
   public Map<String, Object> jwks() {

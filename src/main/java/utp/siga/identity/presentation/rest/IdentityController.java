@@ -9,28 +9,28 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 import utp.siga.identity.application.dto.Api;
-import utp.siga.identity.application.usecase.AuthService;
-import utp.siga.identity.application.usecase.ManagementService;
+import utp.siga.identity.application.port.in.AuthenticationUseCase;
+import utp.siga.identity.application.port.in.IdentityManagementUseCase;
+import utp.siga.identity.application.port.in.IdentityQueryUseCase;
+import utp.siga.identity.application.port.in.KeyDiscoveryUseCase;
 import utp.siga.identity.domain.exception.IdentityException;
-import utp.siga.identity.infrastructure.persistence.IdentityRepository;
-import utp.siga.identity.infrastructure.security.TokenService;
 
 @RestController
 public class IdentityController {
-  private final AuthService auth;
-  private final ManagementService management;
-  private final IdentityRepository repo;
-  private final TokenService tokens;
+  private final AuthenticationUseCase auth;
+  private final IdentityManagementUseCase management;
+  private final IdentityQueryUseCase queries;
+  private final KeyDiscoveryUseCase keys;
 
   public IdentityController(
-      AuthService auth,
-      ManagementService management,
-      IdentityRepository repo,
-      TokenService tokens) {
+      AuthenticationUseCase auth,
+      IdentityManagementUseCase management,
+      IdentityQueryUseCase queries,
+      KeyDiscoveryUseCase keys) {
     this.auth = auth;
     this.management = management;
-    this.repo = repo;
-    this.tokens = tokens;
+    this.queries = queries;
+    this.keys = keys;
   }
 
   @PostMapping("/api/v1/auth/login")
@@ -56,12 +56,13 @@ public class IdentityController {
   @PostMapping("/api/v1/auth/logout")
   @ResponseStatus(HttpStatus.NO_CONTENT)
   public void logout(@AuthenticationPrincipal Jwt jwt) {
-    auth.logout(jwt);
+    auth.logout(
+        UUID.fromString(jwt.getSubject()), UUID.fromString(jwt.getClaimAsString("sid")));
   }
 
   @GetMapping("/.well-known/jwks.json")
   public Map<String, Object> jwks() {
-    return tokens.jwks();
+    return keys.jwks();
   }
 
   @GetMapping("/api/v1/users")
@@ -70,13 +71,13 @@ public class IdentityController {
       @RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "20") int size) {
     if (page < 0 || size < 1 || size > 100)
       throw new IdentityException(400, "INVALID_PAGE", "page >= 0 y size entre 1 y 100");
-    return repo.users(page, size);
+    return queries.users(page, size);
   }
 
   @GetMapping("/api/v1/users/{id}")
   @PreAuthorize("hasAuthority('USER_MANAGE')")
   public Api.User user(@PathVariable UUID id) {
-    return repo.user(id);
+    return queries.user(id);
   }
 
   @PostMapping("/api/v1/users")
@@ -108,7 +109,7 @@ public class IdentityController {
   @GetMapping("/api/v1/roles")
   @PreAuthorize("hasAuthority('ROLE_MANAGE')")
   public List<Api.Role> roles() {
-    return repo.roles();
+    return queries.roles();
   }
 
   @PostMapping("/api/v1/roles")
@@ -128,6 +129,6 @@ public class IdentityController {
   @GetMapping("/api/v1/permissions")
   @PreAuthorize("hasAuthority('ROLE_MANAGE')")
   public List<Map<String, Object>> permissions() {
-    return repo.jdbc().queryForList("SELECT id,code,description FROM iam.permission ORDER BY code");
+    return queries.permissions();
   }
 }

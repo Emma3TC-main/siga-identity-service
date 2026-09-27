@@ -8,9 +8,10 @@ import javax.crypto.*;
 import javax.crypto.spec.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import utp.siga.identity.application.port.out.CryptoPort;
 
 @Component
-public class Crypto {
+public class Crypto implements CryptoPort {
   private final byte[] key;
   private final SecureRandom random = new SecureRandom();
 
@@ -69,6 +70,16 @@ public class Crypto {
     } catch (GeneralSecurityException e) {
       throw new IllegalStateException("Decryption failed", e);
     }
+  }
+
+  @Override
+  public String hashValue(String value) {
+    return hash(value);
+  }
+
+  @Override
+  public Long verifyTotp(String secret, String otp, long now, Long lastStep) {
+    return verify(secret, otp, now, lastStep);
   }
 
   public static String hash(String value) {

@@ -6,10 +6,11 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Component;
+import utp.siga.identity.application.port.out.ChallengePort;
 import utp.siga.identity.domain.exception.IdentityException;
 
 @Component
-public class ChallengeStore {
+public class ChallengeStore implements ChallengePort {
   private final StringRedisTemplate redis;
   private final long ttl;
   private final int max, rate;

@@ -1,0 +1,5 @@
+INSERT INTO iam.permission(id,code,description) VALUES
+('10000000-0000-0000-0000-000000000010','SUPPLIER_MANAGE','Gestionar proveedores');
+
+INSERT INTO iam.role_permission(role_id,permission_id) VALUES
+('11000000-0000-0000-0000-000000000001','10000000-0000-0000-0000-000000000010');

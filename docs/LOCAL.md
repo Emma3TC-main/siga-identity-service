@@ -44,7 +44,7 @@ El inicializador genera secretos nuevos y claves RSA/AES; **no copiar contraseñ
 
 Esos archivos están ignorados por Git; preservarlos junto a sus volúmenes. El archivo de Identity contiene rutas de claves de **esa instalación** y no debe copiarse a otro equipo. Repetir Init conserva lo existente, incluidos los puertos; una configuración incompleta falla sin regenerar secretos sobre datos.
 
-El proyecto Docker será `siga-team`, con nombres y volúmenes propios. PostgreSQL crea base `siga`, rol `siga_iam`, base `siga_identity_local_test` y rol `siga_iam_test`; este último **no tiene CONNECT sobre siga**. Flyway de Identity crea/posee exclusivamente `iam` y aplica V1–V4. No ejecutar el SQL consolidado de la documentación.
+El proyecto Docker será `siga-team`, con nombres y volúmenes propios. PostgreSQL crea base `siga`, rol `siga_iam`, base `siga_identity_local_test` y rol `siga_iam_test`; este último **no tiene CONNECT sobre siga**. Flyway de Identity crea/posee exclusivamente `iam` y aplica V1–V5. No ejecutar el SQL consolidado de la documentación.
 
 Start espera salud de PostgreSQL/Redis/RabbitMQ y verifica ambos logins. Start-Local compila sin repetir pruebas, copia el JAR a `runtime` con su SHA-256 en el nombre, inicia esa copia y espera readiness (hasta 45 s). Un build posterior puede reemplazar archivos en `target` sin modificar el artefacto abierto por la JVM. No iniciar dos procesos para la misma instancia.
 

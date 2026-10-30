@@ -2,13 +2,13 @@
 
 > No sustituye `siga-documentation/SIGA_Documentacion_Tecnica_Final_v1.2/database/dictionary.md`. Los campos añadidos por V4 describen el código existente y están pendientes de alineación aprobada: ver [propuesta de modelo/contrato](../PROPUESTAS_CONTRATO_Y_REFRESH.md).
 
-Se conservan las siete tablas canónicas de SIGA v1.2. El modelo físico completo de este servicio está en `physical_model.sql`; la ejecución se hace exclusivamente mediante Flyway V1–V4.
+Se conservan las siete tablas canónicas de SIGA v1.2. El modelo físico completo de este servicio está en `physical_model.sql`; la ejecución se hace exclusivamente mediante Flyway V1–V5.
 
 | Tabla | Responsabilidad y restricciones |
 |---|---|
 | user_account | UUID, username/email únicos, hash Argon2id, activo, bloqueo tras 5 fallos por 15 min. Secreto TOTP cifrado AES-256-GCM. |
 | role | Código único, nombre y estado. ADMIN es un rol protegido. |
-| permission | Catálogo de 9 permisos iniciales, código único. |
+| permission | Catálogo de 10 permisos iniciales, código único. |
 | user_role | N:M usuario/rol; PK compuesta y FK solo IAM. |
 | role_permission | N:M rol/permiso; PK compuesta y FK solo IAM. |
 | refresh_token | Hash SHA-256 de 256 bits aleatorios, jti único, familia, vencimiento, revocación y siguiente jti. |

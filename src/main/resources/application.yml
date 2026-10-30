@@ -50,4 +50,5 @@ iam:
   lock-seconds: 900
   login-rate: 10
   bootstrap-password: ${IAM_BOOTSTRAP_PASSWORD:}
+  operator-bootstrap-password: ${IAM_OPERATOR_BOOTSTRAP_PASSWORD:}
   outbox-enabled: ${OUTBOX_ENABLED:true}

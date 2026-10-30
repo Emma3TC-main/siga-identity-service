@@ -34,7 +34,7 @@ class EvidencePermissionsMigrationTest {
 
   @Test
   void freshInstallThroughV7ProvisionsEvidencePermissions() throws SQLException {
-    assertThat(flyway(null).migrate().migrationsExecuted).isEqualTo(7);
+    assertThat(flyway(MigrationVersion.fromVersion("7")).migrate().migrationsExecuted).isEqualTo(7);
     assertV7Provisioning();
   }
 
@@ -44,7 +44,7 @@ class EvidencePermissionsMigrationTest {
     assertThat(flyway(MigrationVersion.fromVersion("6")).migrate().migrationsExecuted).isEqualTo(6);
     assertThat(count("SELECT count(*) FROM iam.permission")).isEqualTo(11);
 
-    assertThat(flyway(null).migrate().migrationsExecuted).isOne();
+    assertThat(flyway(MigrationVersion.fromVersion("7")).migrate().migrationsExecuted).isOne();
 
     assertV7Provisioning();
   }
@@ -55,7 +55,7 @@ class EvidencePermissionsMigrationTest {
     execute("INSERT INTO iam.permission(id, code, description) VALUES "
         + "('10000000-0000-0000-0000-000000000012', 'UNRELATED_PERMISSION', 'Unrelated')");
 
-    assertThatThrownBy(() -> flyway(null).migrate())
+    assertThatThrownBy(() -> flyway(MigrationVersion.fromVersion("7")).migrate())
         .hasMessageContaining("V7__evidence_permissions.sql failed");
     assertThat(count("SELECT count(*) FROM iam.permission WHERE code='UNRELATED_PERMISSION'"))
         .isOne();
@@ -69,7 +69,7 @@ class EvidencePermissionsMigrationTest {
     execute("INSERT INTO iam.permission(id, code, description) VALUES "
         + "('20000000-0000-0000-0000-000000000012', 'EVIDENCE_READ', 'Unrelated')");
 
-    assertThatThrownBy(() -> flyway(null).migrate())
+    assertThatThrownBy(() -> flyway(MigrationVersion.fromVersion("7")).migrate())
         .hasMessageContaining("V7__evidence_permissions.sql failed");
     assertThat(count("SELECT count(*) FROM iam.permission"
         + " WHERE id='20000000-0000-0000-0000-000000000012' AND code='EVIDENCE_READ'"))

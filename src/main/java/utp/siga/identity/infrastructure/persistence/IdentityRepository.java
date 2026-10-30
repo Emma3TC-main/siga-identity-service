@@ -1,5 +1,7 @@
 package utp.siga.identity.infrastructure.persistence;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.util.*;
@@ -7,6 +9,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import utp.siga.identity.application.dto.Api;
+import utp.siga.identity.application.event.IdentityAuditEvent;
 import utp.siga.identity.application.port.IdentityStore;
 import utp.siga.identity.application.port.out.AuthPersistencePort;
 import utp.siga.identity.application.port.out.IdentityEventPort;
@@ -25,13 +28,15 @@ public class IdentityRepository
                 IdentityEventPort,
                 IdentityQueryPort {
     private final JdbcTemplate jdbc;
+    private final ObjectMapper json;
 
     public JdbcTemplate jdbc() {
         return jdbc;
     }
 
-    public IdentityRepository(JdbcTemplate jdbc) {
+    public IdentityRepository(JdbcTemplate jdbc, ObjectMapper json) {
         this.jdbc = jdbc;
+        this.json = json;
     }
 
     private final RowMapper<Account> mapper = (r, n) -> new Account(
@@ -324,26 +329,23 @@ public class IdentityRepository
         return jdbc.queryForList("SELECT id,code,description FROM iam.permission ORDER BY code");
     }
 
-    public void event(String type, UUID id) {
-        append(type, id);
-    }
-
-    public void append(String type, UUID id) {
-        var authentication = org.springframework.security.core.context.SecurityContextHolder.getContext()
-                .getAuthentication();
-        String actorId = authentication != null
-                && authentication.getPrincipal() instanceof org.springframework.security.oauth2.jwt.Jwt jwt
-                        ? jwt.getSubject()
-                        : null;
+    public void append(IdentityAuditEvent event) {
+        String payload;
+        try {
+            payload = json.writeValueAsString(event.payload());
+        } catch (JsonProcessingException exception) {
+            throw new IllegalArgumentException("No se pudo serializar el evento IAM", exception);
+        }
         jdbc.update(
                 "INSERT INTO"
-                        + " iam.outbox_event(aggregate_type,aggregate_id,event_type,correlation_id,payload)"
-                        + " VALUES ('Identity',?,?,?,jsonb_build_object('id',?::text,'actorId',?::text))",
-                id,
-                type,
+                        + " iam.outbox_event(aggregate_type,aggregate_id,event_type,schema_version,correlation_id,payload)"
+                        + " VALUES (?,?,?,?,?,?::jsonb)",
+                event.aggregateType(),
+                event.aggregateId(),
+                event.eventType(),
+                event.schemaVersion(),
                 CorrelationFilter.current(),
-                id.toString(),
-                actorId);
+                payload);
     }
 
     public void revoke(UUID id) {

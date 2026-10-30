@@ -35,7 +35,7 @@ class LocationManageMigrationTest {
   @Test
   void freshInstallThroughV10ProvisionsLocationManageForAdminAndSupervisorOnly()
       throws SQLException {
-    assertThat(flyway(null).migrate().migrationsExecuted).isEqualTo(10);
+    assertThat(flyway(MigrationVersion.fromVersion("10")).migrate().migrationsExecuted).isEqualTo(10);
     assertProvisioning();
   }
 
@@ -58,7 +58,7 @@ class LocationManageMigrationTest {
     List<String> assignmentsBefore = rows(
         "SELECT role_id||'|'||permission_id FROM iam.role_permission ORDER BY role_id,permission_id");
 
-    assertThat(flyway(null).migrate().migrationsExecuted).isOne();
+    assertThat(flyway(MigrationVersion.fromVersion("10")).migrate().migrationsExecuted).isOne();
 
     assertThat(userRows()).containsExactlyElementsOf(usersBefore);
     assertThat(refreshTokenRows()).containsExactlyElementsOf(refreshTokensBefore);
@@ -81,7 +81,7 @@ class LocationManageMigrationTest {
     execute("INSERT INTO iam.permission(id, code, description) VALUES "
         + "('10000000-0000-0000-0000-000000000016', 'UNRELATED_PERMISSION', 'Unrelated')");
 
-    assertThatThrownBy(() -> flyway(null).migrate())
+    assertThatThrownBy(() -> flyway(MigrationVersion.fromVersion("10")).migrate())
         .hasMessageContaining("V10__location_manage_permission.sql failed");
     assertThat(count("SELECT count(*) FROM iam.permission WHERE code='UNRELATED_PERMISSION'"))
         .isOne();
@@ -95,7 +95,7 @@ class LocationManageMigrationTest {
     execute("INSERT INTO iam.permission(id, code, description) VALUES "
         + "('20000000-0000-0000-0000-000000000016', 'LOCATION_MANAGE', 'Unrelated')");
 
-    assertThatThrownBy(() -> flyway(null).migrate())
+    assertThatThrownBy(() -> flyway(MigrationVersion.fromVersion("10")).migrate())
         .hasMessageContaining("V10__location_manage_permission.sql failed");
     assertThat(count("SELECT count(*) FROM iam.permission WHERE "
         + "id='20000000-0000-0000-0000-000000000016' AND code='LOCATION_MANAGE'"))

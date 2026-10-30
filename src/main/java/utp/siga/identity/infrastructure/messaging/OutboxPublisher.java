@@ -53,18 +53,7 @@ public class OutboxPublisher {
     for (var row : events) {
       UUID id = (UUID) row.get("id");
       try {
-        var envelope = new LinkedHashMap<String, Object>();
-        envelope.put("eventId", id);
-        envelope.put("eventType", row.get("event_type"));
-        envelope.put("schemaVersion", row.get("schema_version"));
-        envelope.put("producer", "identity-service");
-        envelope.put("aggregateType", row.get("aggregate_type"));
-        envelope.put("causationId", row.get("causation_id"));
-        envelope.put("aggregateId", row.get("aggregate_id"));
-        envelope.put("correlationId", row.get("correlation_id"));
-        envelope.put(
-            "occurredAt", ((java.sql.Timestamp) row.get("occurred_at")).toInstant().toString());
-        envelope.put("payload", mapper.readTree(row.get("payload").toString()));
+        var envelope = envelope(row, mapper);
         var properties = new MessageProperties();
         properties.setContentType("application/json");
         properties.setMessageId(id.toString());
@@ -72,7 +61,7 @@ public class OutboxPublisher {
         var confirm = new CorrelationData(id.toString());
         rabbit.send(
             "siga.events",
-            "iam." + row.get("event_type").toString(),
+            routingKey(row.get("event_type").toString(), ((Number) row.get("schema_version")).intValue()),
             new Message(mapper.writeValueAsBytes(envelope), properties),
             confirm);
         if (!confirm.getFuture().get(5, TimeUnit.SECONDS).isAck() || confirm.getReturned() != null)
@@ -92,5 +81,35 @@ public class OutboxPublisher {
                 id);
       }
     }
+  }
+
+  static Map<String, Object> envelope(Map<String, Object> row, ObjectMapper mapper) throws Exception {
+    var envelope = new LinkedHashMap<String, Object>();
+    envelope.put("eventId", row.get("id"));
+    envelope.put("eventType", row.get("event_type"));
+    envelope.put("schemaVersion", row.get("schema_version"));
+    envelope.put("producer", "identity-service");
+    envelope.put("aggregateType", row.get("aggregate_type"));
+    envelope.put("aggregateId", row.get("aggregate_id"));
+    envelope.put("correlationId", row.get("correlation_id"));
+    if (row.get("causation_id") != null) envelope.put("causationId", row.get("causation_id"));
+    envelope.put(
+        "occurredAt", ((java.sql.Timestamp) row.get("occurred_at")).toInstant().toString());
+    envelope.put("payload", mapper.readTree(row.get("payload").toString()));
+    return envelope;
+  }
+
+  static String routingKey(String eventType, int schemaVersion) {
+    if (schemaVersion == 1) return "iam." + eventType;
+    if (schemaVersion != 2) throw new IllegalArgumentException("Unsupported IAM schema version");
+    return switch (eventType) {
+      case "UserCreated" -> "iam.user.created.v2";
+      case "UserUpdated" -> "iam.user.updated.v2";
+      case "UserDisabled" -> "iam.user.disabled.v2";
+      case "UserRolesChanged" -> "iam.user.roles.changed.v2";
+      case "RoleCreated" -> "iam.role.created.v2";
+      case "RolePermissionsChanged" -> "iam.role.permissions.changed.v2";
+      default -> throw new IllegalArgumentException("Unsupported IAM v2 event type");
+    };
   }
 }

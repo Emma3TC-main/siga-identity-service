@@ -34,7 +34,7 @@ class ReportingPermissionsMigrationTest {
 
   @Test
   void freshInstallThroughV8ProvisionsCanonicalReportingPermissions() throws SQLException {
-    assertThat(flyway(null).migrate().migrationsExecuted).isEqualTo(8);
+    assertThat(flyway(MigrationVersion.fromVersion("8")).migrate().migrationsExecuted).isEqualTo(8);
     assertV8Provisioning();
   }
 
@@ -44,7 +44,7 @@ class ReportingPermissionsMigrationTest {
     assertThat(flyway(MigrationVersion.fromVersion("7")).migrate().migrationsExecuted).isEqualTo(7);
     long existingGrants = count("SELECT count(*) FROM iam.role_permission");
 
-    assertThat(flyway(null).migrate().migrationsExecuted).isOne();
+    assertThat(flyway(MigrationVersion.fromVersion("8")).migrate().migrationsExecuted).isOne();
 
     assertV8Provisioning();
     assertThat(count("SELECT count(*) FROM iam.role_permission")).isEqualTo(existingGrants + 2);
@@ -56,7 +56,7 @@ class ReportingPermissionsMigrationTest {
     execute("INSERT INTO iam.permission(id, code, description) VALUES "
         + "('10000000-0000-0000-0000-000000000014', 'UNRELATED_PERMISSION', 'Unrelated')");
 
-    assertThatThrownBy(() -> flyway(null).migrate())
+    assertThatThrownBy(() -> flyway(MigrationVersion.fromVersion("8")).migrate())
         .hasMessageContaining("V8__reporting_permissions.sql failed");
     assertThat(count("SELECT count(*) FROM iam.permission WHERE code='UNRELATED_PERMISSION'"))
         .isOne();

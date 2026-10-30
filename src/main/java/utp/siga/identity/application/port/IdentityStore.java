@@ -18,6 +18,4 @@ public interface IdentityStore {
   Api.Role role(UUID id);
 
   Api.Page users(int page, int size);
-
-  void event(String type, UUID id);
 }

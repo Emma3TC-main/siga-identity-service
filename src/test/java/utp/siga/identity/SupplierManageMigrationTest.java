@@ -28,7 +28,7 @@ class SupplierManageMigrationTest {
   void freshInstallThroughV5ProvisionsSupplierManageOnlyForAdmin() throws SQLException {
     String url = System.getenv("SIGA_MIGRATION_FRESH_DB_URL");
 
-    var result = flyway(url, null).migrate();
+    var result = flyway(url, MigrationVersion.fromVersion("5")).migrate();
 
     assertThat(result.migrationsExecuted).isEqualTo(5);
     assertProvisioning(url);

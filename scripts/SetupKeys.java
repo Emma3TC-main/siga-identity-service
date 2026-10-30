@@ -9,6 +9,14 @@ public class SetupKeys {
     if(Files.exists(dir.resolve("private.pem"))||Files.exists(dir.resolve("public.pem"))||Files.exists(env)) {
       if(!Files.exists(dir.resolve("private.pem"))||!Files.exists(dir.resolve("public.pem"))||!Files.exists(env))
         throw new IllegalStateException("Incomplete existing configuration; restore matching keys/env, never regenerate over data.");
+      var lines=Files.readAllLines(env);
+      if(lines.stream().noneMatch(line -> line.startsWith("IAM_OPERATOR_BOOTSTRAP_PASSWORD="))) {
+        var random=new SecureRandom();
+        String separator=Files.size(env)>0 && !Files.readString(env).endsWith("\n") ? "\n" : "";
+        Files.writeString(env,separator+"IAM_OPERATOR_BOOTSTRAP_PASSWORD="+token(random)+"\n",StandardOpenOption.APPEND);
+        System.out.println("Added missing operator bootstrap secret; existing keys and secrets preserved");
+        return;
+      }
       System.out.println("Existing configuration preserved"); return;
     }
     Files.createDirectories(dir);
@@ -17,7 +25,7 @@ public class SetupKeys {
     write(dir.resolve("private.pem"),"PRIVATE KEY",pair.getPrivate().getEncoded());
     write(dir.resolve("public.pem"),"PUBLIC KEY",pair.getPublic().getEncoded());
     var random=new SecureRandom();byte[] key=new byte[32];random.nextBytes(key);
-    Files.writeString(env,"DB_PASSWORD="+token(random)+"\nRABBITMQ_PASSWORD="+token(random)+"\nMFA_ENCRYPTION_KEY="+Base64.getEncoder().encodeToString(key)+"\nIAM_BOOTSTRAP_PASSWORD="+token(random)+"\nJWT_PRIVATE_KEY="+dir.resolve("private.pem").toAbsolutePath().normalize().toUri()+"\nJWT_PUBLIC_KEY="+dir.resolve("public.pem").toAbsolutePath().normalize().toUri()+"\n");
+    Files.writeString(env,"DB_PASSWORD="+token(random)+"\nRABBITMQ_PASSWORD="+token(random)+"\nMFA_ENCRYPTION_KEY="+Base64.getEncoder().encodeToString(key)+"\nIAM_BOOTSTRAP_PASSWORD="+token(random)+"\nIAM_OPERATOR_BOOTSTRAP_PASSWORD="+token(random)+"\nJWT_PRIVATE_KEY="+dir.resolve("private.pem").toAbsolutePath().normalize().toUri()+"\nJWT_PUBLIC_KEY="+dir.resolve("public.pem").toAbsolutePath().normalize().toUri()+"\n");
     System.out.println("Created .secrets and .env; keep both private.");
   }
   static String token(SecureRandom random){byte[] data=new byte[24];random.nextBytes(data);return Base64.getUrlEncoder().withoutPadding().encodeToString(data);}

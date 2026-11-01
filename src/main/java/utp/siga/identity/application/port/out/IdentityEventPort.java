@@ -1,7 +1,7 @@
 package utp.siga.identity.application.port.out;
 
-import java.util.UUID;
+import utp.siga.identity.application.event.IdentityAuditEvent;
 
 public interface IdentityEventPort {
-  void append(String eventType, UUID aggregateId);
+  void append(IdentityAuditEvent event);
 }

@@ -33,7 +33,7 @@ class RoleApprovalMigrationTest {
 
   @Test
   void freshInstallThroughV6ProvisionsCatalogReadAndOperationalRoles() throws SQLException {
-    var result = flyway(null).migrate();
+    var result = flyway(MigrationVersion.fromVersion("6")).migrate();
 
     assertThat(result.migrationsExecuted).isEqualTo(6);
     assertV6Provisioning();
@@ -47,7 +47,7 @@ class RoleApprovalMigrationTest {
     assertThat(count("SELECT count(*) FROM iam.user_account WHERE username='encargado.demo'"))
         .isZero();
 
-    assertThat(flyway(null).migrate().migrationsExecuted).isOne();
+    assertThat(flyway(MigrationVersion.fromVersion("6")).migrate().migrationsExecuted).isOne();
 
     assertV6Provisioning();
   }

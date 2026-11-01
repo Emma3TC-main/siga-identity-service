@@ -32,7 +32,7 @@ class PhysicalCountPermissionMigrationTest {
 
   @Test
   void freshInstallThroughV9ProvisionsCanonicalPermissionAndExactRoles() throws SQLException {
-    assertThat(flyway(null).migrate().migrationsExecuted).isEqualTo(9);
+    assertThat(flyway(MigrationVersion.fromVersion("9")).migrate().migrationsExecuted).isEqualTo(9);
     assertProvisioning();
   }
 
@@ -43,7 +43,7 @@ class PhysicalCountPermissionMigrationTest {
     long grants = count("SELECT count(*) FROM iam.role_permission");
     long users = count("SELECT count(*) FROM iam.user_account");
 
-    assertThat(flyway(null).migrate().migrationsExecuted).isOne();
+    assertThat(flyway(MigrationVersion.fromVersion("9")).migrate().migrationsExecuted).isOne();
 
     assertProvisioning();
     assertThat(count("SELECT count(*) FROM iam.permission")).isEqualTo(permissions + 1);
@@ -57,7 +57,7 @@ class PhysicalCountPermissionMigrationTest {
     execute("INSERT INTO iam.permission(id, code, description) VALUES "
         + "('10000000-0000-0000-0000-000000000015', 'UNRELATED_PERMISSION', 'Unrelated')");
 
-    assertThatThrownBy(() -> flyway(null).migrate())
+    assertThatThrownBy(() -> flyway(MigrationVersion.fromVersion("9")).migrate())
         .hasMessageContaining("V9__physical_count_permission.sql failed");
     assertThat(count("SELECT count(*) FROM iam.permission WHERE code='UNRELATED_PERMISSION'"))
         .isOne();
@@ -71,7 +71,7 @@ class PhysicalCountPermissionMigrationTest {
     execute("INSERT INTO iam.permission(id, code, description) VALUES "
         + "('20000000-0000-0000-0000-000000000015', 'INVENTORY_COUNT', 'Unrelated')");
 
-    assertThatThrownBy(() -> flyway(null).migrate())
+    assertThatThrownBy(() -> flyway(MigrationVersion.fromVersion("9")).migrate())
         .hasMessageContaining("V9__physical_count_permission.sql failed");
     assertThat(count("SELECT count(*) FROM iam.permission WHERE "
         + "id='20000000-0000-0000-0000-000000000015' AND code='INVENTORY_COUNT'"))
